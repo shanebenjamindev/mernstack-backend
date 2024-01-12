@@ -15,6 +15,7 @@ const authMiddleware = (req, res, next) => {
             })
         }
         const { payload } = user
+        
         if (payload.isAdmin) {
             next()
         } else {
