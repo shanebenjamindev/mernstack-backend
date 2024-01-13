@@ -56,7 +56,6 @@ const loginUser = (loginUser) => {
                     message: "User is not defined"
                 })
             }
-
             const comparePassword = bcrypt.compareSync(password, checkUser.password)
             if (!comparePassword) {
                 resolve({
@@ -102,7 +101,7 @@ const updateUser = (id, data) => {
                 })
             }
 
-            const updatedUser = await User.findByIdAndUpdate(id, data, { new: true })
+            const updatedUser = await User.findByIdAndUpdate({ _id: id }, data, { new: true })
 
             resolve({
                 status: "OK",
@@ -145,7 +144,7 @@ const deleteUser = (id) => {
 const getAllUser = () => {
     return new Promise(async (resolve, reject) => {
         try {
-        
+
             const allUser = await User.find()
 
             resolve({
