@@ -159,10 +159,38 @@ const getAllUser = () => {
     })
 }
 
+
+const detailUser = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOne({
+                _id: id
+            })
+
+            if (user === null) {
+                resolve({
+                    status: "OK",
+                    message: "User is not defined"
+                })
+            }
+
+            resolve({
+                status: "OK",
+                message: "success",
+                data: user
+            })
+
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     createUser,
     loginUser,
     updateUser,
     deleteUser,
-    getAllUser
+    getAllUser,
+    detailUser
 }
