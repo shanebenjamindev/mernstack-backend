@@ -3,14 +3,14 @@ const Product = require('../models/ProductModal');
 const createProduct = (newProduct) => {
     return new Promise(async (resolve, reject) => {
         const { name, image, type, price, countInStock, rating, description } = newProduct
-        console.log(newProduct);
         try {
 
-            const checkProduct = await Product.findOne ( {
-                name : name
+            const checkProduct = await Product.findOne({
+                name: name
             })
+
             if (checkProduct !== null) {
-                resolve ({
+                resolve({
                     status: "OK",
                     message: "product exit"
                 })
@@ -114,9 +114,31 @@ const detailProduct = (id) => {
         }
     })
 }
+
+
+const getAllProduct = (limit, page) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allProduct = await Product.find().limit(limit).skip(page * limit)
+            const totalProduct = await Product.countDocuments()
+            resolve({
+                status: "OK",
+                message: "success",
+                data: allProduct,
+                pageCurrent: page,
+                totalProduct: totalProduct,
+                totalPage: Math.ceil(totalProduct / limit)
+            })
+
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 module.exports = {
     createProduct,
     updateProduct,
     deleteProduct,
-    detailProduct
+    detailProduct,
+    getAllProduct
 }
