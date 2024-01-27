@@ -2,51 +2,48 @@ const User = require('../models/UserModal');
 const bcrypt = require('bcrypt');
 const { genneralAccessToken, genneralRefreshToken } = require('./jwtServices');
 
-const createUser = (newUser) => {
-    return new Promise(async (resolve, reject) => {
-        const { name, email, password, confirmPassword, phone } = newUser
-        try {
+const createUser = async (newUser) => {
+    const { name, email, password, confirmPassword, phone } = newUser;
+    try {
+        const checkUser = await User.findOne({ email });
 
-            const checkUser = await User.findOne({
-                email: email
-            })
-
-            if (checkUser !== null) {
-                resolve({
-                    status: "OK",
-                    message: "Email already exit"
-                })
-            }
-
-            const hash = bcrypt.hashSync(password, 10)
-
-            const createdUser = await User.create({
-                name,
-                email,
-                password: hash,
-                confirmPassword: hash,
-                phone
-            })
-
-            if (createdUser) {
-                resolve({
-                    status: "OK",
-                    message: "success added user"
-                })
-            }
-
-        } catch (e) {
-            reject(e)
+        if (checkUser) {
+            return {
+                status: "FAIL",
+                message: "Email already exists",
+            };
         }
-    })
-}
+
+        const hash = bcrypt.hashSync(password, 10);
+
+        const createdUser = await User.create({
+            name,
+            email,
+            password: hash,
+            confirmPassword,
+            phone,
+        });
+
+        if (createdUser) {
+            return {
+                status: "OK",
+                message: "User created successfully",
+            };
+        }
+    } catch (error) {
+        return {
+            status: "ERROR",
+            message: "Error creating user",
+            error,
+        };
+    }
+};
 
 const loginUser = (loginUser) => {
-    console.log(loginUser);
     return new Promise(async (resolve, reject) => {
         const { email, password } = loginUser
         try {
-
+            console.log(loginUser);
             const checkUser = await User.findOne({
                 email: email
             })
@@ -79,7 +76,7 @@ const loginUser = (loginUser) => {
                 message: "success",
                 data: checkUser,
                 access_token,
-                refresh_token
+                refresh_token,
             })
 
         } catch (e) {
@@ -185,6 +182,7 @@ const detailUser = (id) => {
         }
     })
 }
+
 
 module.exports = {
     createUser,

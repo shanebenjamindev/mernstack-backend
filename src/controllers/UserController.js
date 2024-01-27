@@ -1,4 +1,5 @@
 const UserService = require('../services/UserServices')
+const JwtService = require('../services/jwtServices')
 
 const createUser = async (req, res) => {
     try {
@@ -35,13 +36,31 @@ const createUser = async (req, res) => {
     }
 }
 
+const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken.split(` `)[1]
+        if (!token) {
+            return res.status(200).json({
+                status: 'ERR',
+                message: 'token is required'
+            })
+        }
+        const response = await JwtService.refreshToken(token)
+        return res.status(200).json(response)
+    } catch (e) {
+        return res.status(404).json({
+            message: e
+        })
+    }
+}
+
 const loginUser = async (req, res) => {
     try {
-        const { email, password} = req.body
+        const { email, password } = req.body
         const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
         const isCheckEmail = reg.test(email)
 
-        if (!email || !password ) {
+        if (!email || !password) {
             return res.status(200).json({
                 status: "ERR",
                 message: "input is required"
@@ -51,10 +70,15 @@ const loginUser = async (req, res) => {
                 status: "ERR",
                 message: "check the email"
             })
-        } 
-        // console.log("isCheckEmail", isCheckEmail);
+        }
         const response = await UserService.loginUser(req.body)
-        return res.status(200).json(response)
+        const { refresh_token, ...newRespone } = response
+
+        res.cookie('refresh_token', refresh_token, {
+            HttpOnly: true,
+            Secure: true
+        })
+        return res.status(200).json(newRespone)
 
     }
     catch (e) {
@@ -147,5 +171,6 @@ module.exports = {
     updateUser,
     deleteUser,
     getAllUser,
-    detailUser
+    detailUser,
+    refreshToken
 }
