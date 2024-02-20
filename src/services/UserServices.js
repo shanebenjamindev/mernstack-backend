@@ -77,6 +77,7 @@ const loginUser = (userLogin) => {
                 access_token,
                 refresh_token
             })
+
         } catch (e) {
             reject(e)
         }
@@ -95,6 +96,13 @@ const updateUser = (id, data) => {
                     status: "OK",
                     message: "User is not defined"
                 })
+            }
+
+            console.log(data);
+
+            if (data.password && data.confirmPassword) {
+                data.password = bcrypt.hashSync(data.password, 10);
+                data.confirmPassword = bcrypt.hashSync(data.confirmPassword, 10);
             }
 
             const updatedUser = await User.findByIdAndUpdate({ _id: id }, data, { new: true })

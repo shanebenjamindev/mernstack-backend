@@ -53,13 +53,13 @@ const loginUser = async (req, res) => {
         }
         const response = await UserService.loginUser(req.body)
         const { refresh_token, ...newReponse } = response
+
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
-            path: '/',
+            secure: true,
         })
-        return res.status(200).json({ ...newReponse, refresh_token })
+
+        return res.status(200).json(response)
     } catch (e) {
         return res.status(404).json({
             message: e
@@ -123,7 +123,6 @@ const getAllUser = async (req, res) => {
 const detailUser = async (req, res) => {
     try {
         const userId = req.params.id
-
         if (!userId) {
             return res.status(200).json({
                 statut: "ERR",
@@ -142,15 +141,17 @@ const detailUser = async (req, res) => {
 
 const refreshToken = async (req, res) => {
     try {
-        let token = req.headers.token.split(' ')[1]
+        const token = req.headers.cookie
+
         if (!token) {
             return res.status(200).json({
                 status: 'ERR',
                 message: 'The token is required'
             })
         }
-        const response = await JwtService.refreshToken(token)
+        const response = await JwtService.refreshTokenJwtService(token)
         return res.status(200).json(response)
+
     } catch (e) {
         return res.status(404).json({
             message: e
